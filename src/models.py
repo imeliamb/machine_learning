@@ -1,7 +1,18 @@
-def cnn_encoder(fit=True):
-    n_data = trainset.shape[0]
-    n_features = trainset.shape[1]
-    n_outputs = trainsetout.shape[1]
+import tensorflow as tf
+import numpy as np
+import os
+
+def gaussian_with_constant(x, a, center, width, background, noise=None):
+
+
+    y = a * np.exp(-(center-x)**2/width**2) + background
+    if noise is not None:
+        y = np.random.normal(y, noise*np.sqrt(np.fabs(y)))
+    return y
+
+
+def cnn_encoder(n_data, n_features, n_outputs ):
+    
 
     padding = 'same'
 
@@ -13,25 +24,13 @@ def cnn_encoder(fit=True):
                             activation='relu', padding='same'),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(100, activation='relu'),
-        tf.keras.layers.Dense(trainsetout.shape[1])
+        tf.keras.layers.Dense(n_outputs)
     ])
+    
+    return model
+    
+def cnn_decoder(n_data, n_features, n_outputs):
 
-    # If we are just building the model, stop here
-    if not fit:
-        return model
-
-    model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam())
-    print("Encoder ready")
-
-    history = model.fit(trainset, trainsetout,
-                        epochs=20, batch_size=128,
-                        validation_data=(testset, testsetout))
-    return model, history
-
-def cnn_decoder(fit=True):
-    n_data = trainset.shape[0]
-    n_outputs = trainset.shape[1]
-    n_features = trainsetout.shape[1]
     
     padding = 'same'
 
@@ -50,20 +49,12 @@ def cnn_decoder(fit=True):
         tf.keras.layers.Dense(n_outputs)
     ])
 
-    if not fit:
-        return model
+   
+    return model
 
-    model.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam())
-    print("Decoder ready")
-
-    history = model.fit(trainsetout, trainset,
-                        epochs=20, batch_size=128,
-                        validation_data=(testsetout, testset))
-    return model, history
-
-def auto_encoder():
-    encoder = cnn_encoder(False)
-    decoder = cnn_decoder(False)
+def auto_encoder(n_data, n_features, n_outputs):
+    encoder = cnn_encoder(n_data, n_features, n_outputs)
+    decoder = cnn_decoder(n_data, n_outputs, n_features)
     
     ae_model = tf.keras.models.Sequential([encoder, decoder]) 
 
