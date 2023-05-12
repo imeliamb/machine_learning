@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import os
+from tensorflow.keras.models import model_from_json
 
 def gaussian_with_constant(x, a, center, width, background, noise=None):
 
@@ -64,19 +65,42 @@ def auto_encoder(n_data, n_features, n_outputs):
     
     return ae_model, encoder, decoder
 
-def save_model(ae_model, encoder, decoder, output_dir):
+def save_model(ae_model, encoder, decoder, name, output_dir):
     encoder_json=encoder.to_json()
-    with open(os.path.join(output_dir, "encoder.json"), "w") as json_file:
+    with open(os.path.join(output_dir, "%s-encoder.json" % name), "w") as json_file:
               json_file.write(encoder_json)
-    encoder.save_weights(os.path.join(output_dir, "encoder.h5"))
+    encoder.save_weights(os.path.join(output_dir, "%s-encoder.h5" % name))
               
     decoder_json=decoder.to_json()
-    with open(os.path.join(output_dir, "decoder.json"), "w") as json_file:
+    with open(os.path.join(output_dir, "%s-decoder.json" % name), "w") as json_file:
               json_file.write(decoder_json)
-    decoder.save_weights(os.path.join(output_dir, "decoder.h5"))
+    decoder.save_weights(os.path.join(output_dir, "%s-decoder.h5" % name))
               
     ae_model_json=ae_model.to_json()
-    with open(os.path.join(output_dir, "ae_model.json"), "w") as json_file:
+    with open(os.path.join(output_dir, "%s-ae_model.json" % name), "w") as json_file:
               json_file.write(ae_model_json)
-    encoder.save_weights(os.path.join(output_dir, "ae_model.h5"))
+    encoder.save_weights(os.path.join(output_dir, "%s-ae_model.h5" % name))
 
+
+def load_model(name, output_dir):
+    json_file=open(os.path.join(output_dir, "%s-encoder.json" % name), "r")
+    loaded_model_json=json_file.read()
+    json_file.close()
+    
+    encoder= model_from_json(loaded_model_json)
+    encoder.load_weights(os.path.join(output_dir, "%s-encoder.h5" % name))
+    
+    
+    json_file=open(os.path.join(output_dir, "%s-decoder.json" % name), "r")
+    loaded_model_json=json_file.read()
+    json_file.close()
+    
+    decoder=model_from_json(loaded_model_json)
+    decoder.load_weights(os.path.join(output_dir, "%s-decoder.h5" % name))
+    
+    json_file=open(os.path.join(output_dir, "%s-ae_model.json" % name), "r")
+    loaded_model_json=json_file.read()
+    json_file.close()
+    
+    ae_model=model_from_json(loaded_model_json)
+    ae_model.load_weights(os.path.join(output_dir, "%s-ae_model.h5" % name))
