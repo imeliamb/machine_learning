@@ -65,7 +65,7 @@ def auto_encoder(n_data, n_features, n_outputs):
     
     return ae_model, encoder, decoder
 
-def save_model(ae_model, encoder, decoder, name, output_dir):
+def save_ae(ae_model, encoder, decoder, name, output_dir):
     encoder_json=encoder.to_json()
     with open(os.path.join(output_dir, "%s-encoder.json" % name), "w") as json_file:
               json_file.write(encoder_json)
@@ -80,9 +80,11 @@ def save_model(ae_model, encoder, decoder, name, output_dir):
     with open(os.path.join(output_dir, "%s-ae_model.json" % name), "w") as json_file:
               json_file.write(ae_model_json)
     encoder.save_weights(os.path.join(output_dir, "%s-ae_model.h5" % name))
+    
 
 
-def load_model(name, output_dir):
+
+def load_ae(name, output_dir):
     json_file=open(os.path.join(output_dir, "%s-encoder.json" % name), "r")
     loaded_model_json=json_file.read()
     json_file.close()
@@ -104,3 +106,44 @@ def load_model(name, output_dir):
     
     ae_model=model_from_json(loaded_model_json)
     ae_model.load_weights(os.path.join(output_dir, "%s-ae_model.h5" % name))
+    
+def save_model( model, name, output_dir):
+    model_json=model.to_json()
+    with open(os.path.join(output_dir, "%s-model.json" % name), "w") as json_file:
+              json_file.write(model_json)
+    model.save_weights(os.path.join(output_dir, "%s-model.h5" % name))
+    
+    
+def load_model(name, output_dir):
+    json_file=open(os.path.join(output_dir, "%s-model.json" % name), "r")
+    loaded_model_json=json_file.read()
+    json_file.close()
+    
+    model= model_from_json(loaded_model_json)
+    model.load_weights(os.path.join(output_dir, "%s-model.h5" % name))
+    return model
+
+def accuracy( testpars, pred_class):
+    count = 0
+    class_counts = []
+    for i in range(1,5):
+        _counts = []
+        f=0
+        k=0
+        for j in range(1,5):
+            _c = np.sum([int(testpars[idx]==i and pred_class[idx]==j) for idx in range(len(testpars))])
+            _counts.append(_c)
+            f=f+_c
+        for idx in range(len(testpars)):
+            if (testpars[idx]==pred_class[idx]==i):
+                k+=1
+        print(_counts)
+        print("Layer Accuracy : %g" % (k/f))
+    for idx in range(len(pred_class)):
+        if testpars[idx]==pred_class[idx]:
+            count += 1
+    
+
+
+    print("Accuracy: %g" % (count/len(pred_class)))
+   
