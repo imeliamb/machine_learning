@@ -1,0 +1,7 @@
+{
+  "classifier":"\path",
+  "parameter_predictors":[[1, "1layer"],
+                          [2, "2layers"],
+                           ...],
+
+}
