@@ -1,7 +1,9 @@
 {
-  "classifier":"\path",
-  "parameter_predictors":[[1, "1layer"],
-                          [2, "2layers"],
+  "classifier":"/SNS/users/imeliamb/git/machine_learning/data/knn4layer",
+  "parameter_predictors":[[1, "/SNS/users/imeliamb/git/machine_learning/data"],
+                          [2, "/SNS/users/imeliamb/git/machine_learning/data"],
+                          [3, "/SNS/users/imeliamb/git/machine_learning/data"],
+                          [4, "/SNS/users/imeliamb/git/machine_learning/data"],
                            ...],
 
 }
