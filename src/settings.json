@@ -1,9 +1,9 @@
 {
   "classifier":"/SNS/users/imeliamb/git/machine_learning/data/knn4layer",
-  "parameter_predictors":[[1, "/SNS/users/imeliamb/git/machine_learning/data"],
-                          [2, "/SNS/users/imeliamb/git/machine_learning/data"],
-                          [3, "/SNS/users/imeliamb/git/machine_learning/data"],
-                          [4, "/SNS/users/imeliamb/git/machine_learning/data"],
-                           ...],
+  "parameter_predictors":[[1, "/SNS/users/imeliamb/git/machine_learning/data/cnn1layer-model"],
+                          [2, "/SNS/users/imeliamb/git/machine_learning/data/cnn2layer-model"],
+                          [3, "/SNS/users/imeliamb/git/machine_learning/data/threelayerpars-model"],
+                          [4, "/SNS/users/imeliamb/git/machine_learning/data/cnn4layer-model"],
+                           ],
 
 }
