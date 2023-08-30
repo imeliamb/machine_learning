@@ -1,0 +1,1 @@
+{"shell_port": 40917, "iopub_port": 60023, "stdin_port": 44017, "control_port": 42671, "hb_port": 51069, "ip": "127.0.0.1", "key": "8fa9f74e-a72195e6c46c02f2487476ce", "transport": "tcp", "signature_scheme": "hmac-sha256", "kernel_name": "imars3d"}

@@ -1,0 +1,1 @@
+{"shell_port": 55043, "iopub_port": 42269, "stdin_port": 49573, "control_port": 39283, "hb_port": 43117, "ip": "127.0.0.1", "key": "0309e457-3044ae25f1a4396e168a32b5", "transport": "tcp", "signature_scheme": "hmac-sha256", "kernel_name": "tensorflow"}

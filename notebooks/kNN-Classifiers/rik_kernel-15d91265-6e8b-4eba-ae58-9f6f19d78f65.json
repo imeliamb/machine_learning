@@ -1,0 +1,1 @@
+{"shell_port": 38993, "iopub_port": 47041, "stdin_port": 32885, "control_port": 55801, "hb_port": 42365, "ip": "127.0.0.1", "key": "e508c58f-0be66618876f6c2ddf611b6f", "transport": "tcp", "signature_scheme": "hmac-sha256", "kernel_name": "imaging-reduction"}
