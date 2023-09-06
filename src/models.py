@@ -26,7 +26,23 @@ def cnn_encoder(n_data, n_features, n_outputs ):
         tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
                             activation='relu', padding='same'),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(100, activation='relu'),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
+        tf.keras.layers.Dense(n_outputs)
+    ])
+    
+    return model
+
+def cnn_encoder_test(n_data, n_features, n_outputs ):
+    
+
+    padding = 'same'
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding=padding, input_shape=(n_features, 1)),
+        tf.keras.layers.MaxPool1D(pool_size=2),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
         tf.keras.layers.Dense(n_outputs)
     ])
     

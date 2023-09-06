@@ -9,6 +9,8 @@ import pickle
 from tensorflow.keras.models import model_from_json
 import numpy as np
 import os
+import refl1d
+from refl1d.names import *
 
 class StructurePredictor:
 
@@ -155,8 +157,33 @@ class StructurePredictor:
             final_parameters.append(new_parameters)
         return final_parameters
     
-    def graph (self, data):
-        self.predict(data)
+    
+
+def calculate_reflectivity(q, parameters, q_resolution=0.025):
+    """
+        Reflectivity calculation using refl1d
+    """
+    #zeros = np.zeros(len(q))
+    dq = q_resolution * q / 2.355
+
+    # The QProbe object represents the beam
+    probe = QProbe(q, dq, data=(None, None))
+
+    n_layers = int((len(parameters)-1)/3)
+    
+    sample = Slab(material=SLD('Si', rho=2.07), interface=parameters[0])
+    
+    for i in range(n_layers):
+        sample = sample | Slab(material=SLD(name='l%s' % i, rho=parameters[3*i+1]),
+                               thickness=parameters[3*i+2], interface=parameters[3*i+3])
+
+    sample = sample | Slab(material=SLD('Air', rho=0))
+    
+    expt = Experiment(probe=probe, sample=sample)
+
+    q, r = expt.reflectivity()
+    z, sld, _ = expt.smooth_profile()
+    return q, r, z, sld
         
     
 
