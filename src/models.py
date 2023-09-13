@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 import os
 from tensorflow.keras.models import model_from_json
+import pickle
+from pathlib import Path
 
 def gaussian_with_constant(x, a, center, width, background, noise=None):
 
@@ -24,7 +26,79 @@ def cnn_encoder(n_data, n_features, n_outputs ):
         tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
                             activation='relu', padding='same'),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(100, activation='relu'),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
+        tf.keras.layers.Dense(n_outputs)
+    ])
+    
+    return model
+
+def cnn_encoder_onelayer(n_data, n_features, n_outputs ):
+    
+
+    padding = 'same'
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding=padding, input_shape=(n_features, 1)),
+        tf.keras.layers.MaxPool1D(pool_size=2),
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding='same'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
+        tf.keras.layers.Dense(n_outputs)
+    ])
+    
+    return model
+
+def cnn_encoder_twolayer(n_data, n_features, n_outputs ):
+    
+
+    padding = 'same'
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding=padding, input_shape=(n_features, 1)),
+        tf.keras.layers.MaxPool1D(pool_size=2),
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding='same'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
+        tf.keras.layers.Dense(n_outputs)
+    ])
+    
+    return model
+
+def cnn_encoder_threelayer(n_data, n_features, n_outputs ):
+    
+
+    padding = 'same'
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding=padding, input_shape=(n_features, 1)),
+        tf.keras.layers.MaxPool1D(pool_size=2),
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding='same'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
+        tf.keras.layers.Dense(n_outputs)
+    ])
+    
+    return model
+
+def cnn_encoder_fourlayer(n_data, n_features, n_outputs ):
+    
+
+    padding = 'same'
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding=padding, input_shape=(n_features, 1)),
+        tf.keras.layers.MaxPool1D(pool_size=2),
+        tf.keras.layers.Conv1D(filters=40, kernel_size=5, strides=1,
+                            activation='relu', padding='same'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(100, activation='selu', kernel_initializer='lecun_normal'),
         tf.keras.layers.Dense(n_outputs)
     ])
     
@@ -113,6 +187,14 @@ def save_model( model, name, output_dir):
               json_file.write(model_json)
     model.save_weights(os.path.join(output_dir, "%s-model.h5" % name))
     
+def save_knn( model, name, output_dir):
+    output_dir= output_dir+ "/%s" % name
+    filepath = output_dir
+    pickle.dump(model, open(filepath, 'wb'))
+    
+def load_knn( name, output_dir):
+    with open('filename.pkl', 'rb') as f:
+        clf = pickle.load(f)
     
 def load_model(name, output_dir):
     json_file=open(os.path.join(output_dir, "%s-model.json" % name), "r")
@@ -128,6 +210,7 @@ def accuracy( testpars, pred_class):
     class_counts = []
     for i in range(1,5):
         _counts = []
+        _confusion=[]
         f=0
         k=0
         for j in range(1,5):
@@ -137,7 +220,10 @@ def accuracy( testpars, pred_class):
         for idx in range(len(testpars)):
             if (testpars[idx]==pred_class[idx]==i):
                 k+=1
-        print(_counts)
+        for idx in range(0,4):
+            confusion=_counts[idx]/f*100
+            _confusion.append(confusion)
+        print(_confusion)
         print("Layer Accuracy : %g" % (k/f))
     for idx in range(len(pred_class)):
         if testpars[idx]==pred_class[idx]:
@@ -146,4 +232,3 @@ def accuracy( testpars, pred_class):
 
 
     print("Accuracy: %g" % (count/len(pred_class)))
-   
