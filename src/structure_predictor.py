@@ -91,30 +91,22 @@ class StructurePredictor:
         parameters=[]
 
         for idx in range(len(data[0])):
+            one_data_pars=[]
             for i in range (1,5):
                 predictor = self.parameter_predictors[i]
                 pars = predictor.predict(np.asarray([data[0][idx]]))
-                parameters.append(pars[0])
-            
+                one_data_pars.append(pars[0])
+            parameters.append(one_data_pars)
         # Perform parameter optimization
         
         parameters=np.asarray(parameters, dtype=object)
         parameters = self.optimize_parameters(parameters, data)
         final_parameters=[]
-        for i in range(len(data[0])*4):
-            if len(parameters[i])==4:
-                pars = self.rescale_parameters(parameters[i], 1)
-                final_parameters.append(pars)
-            if len(parameters[i])==7:
-                pars = self.rescale_parameters(parameters[i], 2)
-                final_parameters.append(pars)
-            if len(parameters[i])==10:
-                pars = self.rescale_parameters(parameters[i], 3)
-                final_parameters.append(pars)
-            if len(parameters[i])==13:
-                pars = self.rescale_parameters(parameters[i], 4)
-                final_parameters.append(pars)
-                
+        for k in range(len(parameters)):
+            set_of_final=[]
+            for i in range (4):
+                set_of_final.append (self.rescale_parameters(parameters[k][i], i+1))
+            final_parameters.append(set_of_final)
         # Perhaps save some useful info here
         return number_of_layers, final_parameters
 
