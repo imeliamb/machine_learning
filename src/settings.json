@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {
   "classifier":"/SNS/users/imeliamb/git/machine_learning/data/knn4layer",
   "parameter_predictors":[[1, "/SNS/users/imeliamb/git/machine_learning/data/cnn1layer-model", "/SNS/users/m2d/git/analysis_playground/ml/config1-pars.json"],
@@ -11,13 +10,6 @@
                           ["/SNS/users/m2d/git/analysis_playground/ml/config2-pars.json"],
                           ["/SNS/users/m2d/git/analysis_playground/ml/config3-pars.json"],
                           ["/SNS/users/m2d/git/analysis_playground/ml/config4-pars.json"]
-=======
-{"classifier":"/SNS/users/imeliamb/git/machine_learning/data/knn4layer",
-  "parameter_predictors":[[1, "/SNS/users/imeliamb/git/machine_learning/data/cnn1layer-model"],
-                          [2, "/SNS/users/imeliamb/git/machine_learning/data/cnn2layer-model"],
-                          [3, "/SNS/users/imeliamb/git/machine_learning/data/threelayerpars-model"],
-                          [4, "/SNS/users/imeliamb/git/machine_learning/data/cnn4layer-model"]
->>>>>>> 2022a4d51a896fcc8222eaa24514867ae61d7972
                            ]
 
 }
