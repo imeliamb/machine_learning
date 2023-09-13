@@ -98,7 +98,6 @@ class StructurePredictor:
                 one_data_pars.append(pars[0])
             parameters.append(one_data_pars)
         # Perform parameter optimization
-        
         parameters=np.asarray(parameters, dtype=object)
         parameters = self.optimize_parameters(parameters, data)
         final_parameters=[]
