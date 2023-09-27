@@ -11,6 +11,8 @@ import numpy as np
 import os
 import refl1d
 from refl1d.names import *
+from bumps.fitters import fit
+
 
 class StructurePredictor:
 
@@ -25,8 +27,6 @@ class StructurePredictor:
         self.parameter_predictors = {}
         self.parameter_ranges={}
         self.load_parameter_predictors(settings["parameter_predictors"])
-        
-      
 
     def load_knn(self, model_path):
         with open(model_path, 'rb') as f:
@@ -82,7 +82,7 @@ class StructurePredictor:
         # Perhaps save some useful info here
         return number_of_layers, final_parameters
     
-    def big_predict (self,data):
+    def big_predict (self, data):
         number_of_layers=[]
         for i in enumerate(data):
             number_of_layers.append(self.classifier.predict(data[i[0]]))
@@ -109,13 +109,6 @@ class StructurePredictor:
         # Perhaps save some useful info here
         return number_of_layers, final_parameters
 
-
-    def optimize_parameters(self, structure, data):
-        """
-            Mat will write this
-        """
-        return structure
-    
     def rescale_parameters(self, parameters, number_of_layers):
         new_parameters=[]
         for i in range(len (parameters)):
@@ -148,18 +141,34 @@ class StructurePredictor:
             final_parameters.append(new_parameters)
         return final_parameters
     
-    
 
-def calculate_reflectivity(q, parameters, q_resolution=0.025):
-    """
-        Reflectivity calculation using refl1d
-    """
+def fit_data(q, data, parameters, errors=None, q_resolution=0.025):
+    if errors is None:
+        errors = 0.07 * data
+
+    expt = create_fit_experiment(q, parameters, data, errors, q_resolution=0.02)
+    problem = FitProblem(expt)
+    results = fit(problem, method='dream', samples=2000, burn=2000, pop=20, verbose=True)
+    
+    # The results are in a different order: rough, SLD, thickness
+    fit_pars = [results.x[0]]
+    fit_errs = [results.dx[0]]
+
+    n_layers = int((len(parameters)-1)/3)
+    for i in range(n_layers):
+        fit_pars.extend([results.x[3*i+2], results.x[3*i+3], results.x[3*i+1]]) 
+        fit_errs.extend([results.dx[3*i+2], results.dx[3*i+3], results.dx[3*i+1]])
+    return fit_pars, fit_errs
+
+
+def create_fit_experiment(q, parameters, data=None, errors=None, q_resolution=0.025):
     #zeros = np.zeros(len(q))
     dq = q_resolution * q / 2.355
 
     # The QProbe object represents the beam
-    probe = QProbe(q, dq, data=(None, None))
-
+    probe = QProbe(q, dq, data=(data, errors))
+    probe.background = Parameter(value=0.000001,name='background')
+    
     n_layers = int((len(parameters)-1)/3)
     
     sample = Slab(material=SLD('Si', rho=2.07), interface=parameters[0])
@@ -167,16 +176,25 @@ def calculate_reflectivity(q, parameters, q_resolution=0.025):
     for i in range(n_layers):
         sample = sample | Slab(material=SLD(name='l%s' % i, rho=parameters[3*i+1]),
                                thickness=parameters[3*i+2], interface=parameters[3*i+3])
+        sample['l%s' % i].thickness.range(20.0, 950.0)
+        sample['l%s' % i].material.rho.range(-1.0, 7.0)
+        sample['l%s' % i].interface.range(20.0, 60.0)
 
+    sample['Si'].interface.range(4.0, 30.0)
     sample = sample | Slab(material=SLD('Air', rho=0))
     
-    expt = Experiment(probe=probe, sample=sample)
+    return Experiment(probe=probe, sample=sample)
 
+
+def calculate_reflectivity(q, parameters, q_resolution=0.02):
+    """
+        Reflectivity calculation using refl1d
+    """
+
+    expt = create_fit_experiment(q, parameters, q_resolution=0.02)
     q, r = expt.reflectivity()
     z, sld, _ = expt.smooth_profile()
-    return q, r, z, sld
-        
-    
+    return q, r, z, sld  
 
 
 if __name__ == "__main__":
