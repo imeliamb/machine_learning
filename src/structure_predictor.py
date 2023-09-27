@@ -107,7 +107,7 @@ class StructurePredictor:
                 set_of_final.append (self.rescale_parameters(parameters[k][i], i+1))
             final_parameters.append(set_of_final)
         # Perhaps save some useful info here
-        return number_of_layers, final_parameters
+        return number_of_layers, final_parameters, parameters
 
 
     def optimize_parameters(self, structure, data):
