@@ -12,11 +12,12 @@ import os
 import refl1d
 from refl1d.names import *
 from bumps.fitters import fit
-
+import matplotlib
+import matplotlib.pyplot as plt
 
 class StructurePredictor:
 
-    def __init__(self, settings_file, config_number):
+    def __init__(self, settings_file):
         with open(settings_file) as fd:
             settings = json.load(fd)
 
@@ -51,26 +52,17 @@ class StructurePredictor:
     def predict(self, data):
         number_of_layers=[]
         for i in enumerate(data):
-            number_of_layers.append(self.classifier.predict(data[i[0]]))
+            number_of_layers.append(self.classifier.predict(data[i[0]], verbose=0))
         
         number_of_layers=np.asarray(number_of_layers)
         parameters=[]
         for i in range(len(data[0])):
             predictor = self.parameter_predictors[number_of_layers[0][i]]
-            pars = predictor.predict(np.asarray([data[0][i]]))
+            pars = predictor.predict(np.asarray([data[0][i]]), verbose=0)
             parameters.append(pars[0])
-        #for i,d in enumerate(data):
-         #   print("here",number_of_layers[i][1])
-          #  predictor = self.parameter_predictors[number_of_layers[i]]
-           # print(d.shape)
-            #pars = predictor.predict(np.asarray([d[i]]))
-            #pars=np.asarray(pars)
-            #parameters.append(pars)
-            #print("Data %s, Number of layers= %s, Pars= %s" %(i, number_of_layers[i], pars))
-
+        
         # Perform parameter optimization
         parameters=np.asarray(parameters, dtype=object)
-        parameters = self.optimize_parameters(parameters, data)
         final_parameters=[]
         for i in range(len(data[0])):
             pars = self.rescale_parameters(parameters[i], number_of_layers[0][i])
@@ -82,11 +74,10 @@ class StructurePredictor:
         # Perhaps save some useful info here
         return number_of_layers, final_parameters
     
-    def big_predict (self, data):
+    def big_predict (self, data, q_values, optimization, graphing):
         number_of_layers=[]
         for i in enumerate(data):
             number_of_layers.append(self.classifier.predict(data[i[0]]))
-        
         number_of_layers=np.asarray(number_of_layers)
         parameters=[]
 
@@ -94,20 +85,78 @@ class StructurePredictor:
             one_data_pars=[]
             for i in range (1,5):
                 predictor = self.parameter_predictors[i]
-                pars = predictor.predict(np.asarray([data[0][idx]]))
+                pars = predictor.predict(np.asarray([data[0][idx]]), verbose=0)
                 one_data_pars.append(pars[0])
             parameters.append(one_data_pars)
-        # Perform parameter optimization
         parameters=np.asarray(parameters, dtype=object)
-        parameters = self.optimize_parameters(parameters, data)
-        final_parameters=[]
+        almost_parameters=[]
         for k in range(len(parameters)):
-            set_of_final=[]
+            set_of_almost=[]
             for i in range (4):
-                set_of_final.append (self.rescale_parameters(parameters[k][i], i+1))
+                set_of_almost.append (self.rescale_parameters(parameters[k][i], i+1))
+            almost_parameters.append(set_of_almost)
+            
+        #Optional optimization
+        if optimization==False and graphing==False:
+            return number_of_layers, almost_parameters, parameters
+        
+        if optimization==True and graphing==False:
+            final_parameters=self.big_predict_optimize(data, q_values, almost_parameters)
+            return number_of_layers, final_parameters, parameters
+        
+        if optimization==False and graphing==True:
+            final_parameters=almost_parameters
+            self.big_predict_graph(final_parameters, q_values, number_of_layers, data)
+            return number_of_layers, almost_parameters, parameters
+        
+        if optimization==True and graphing==True:
+            final_parameters=self.big_predict_optimize(data, q_values, almost_parameters)
+            self.big_predict_graph(final_parameters, q_values, number_of_layers, data)
+            return number_of_layers, final_parameters, parameters
+        
+        
+    def big_predict_optimize(self, data, q_values, almost_parameters):
+        refl_corrected=self.correct_refl(data, q_values)
+        final_parameters=[]
+        for i in range( len(data[0])):
+            set_of_final=[]
+            for k in range (4):
+                final_pars, error=fit_data(q_values, refl_corrected[i], almost_parameters[i][k])
+                set_of_final.append(final_pars)
             final_parameters.append(set_of_final)
-        # Perhaps save some useful info here
-        return number_of_layers, final_parameters, parameters
+        return final_parameters
+        
+        
+    def big_predict_graph(self, final_parameters, q_values, number_of_layers, data):
+        data=self.correct_refl(data, q_values)
+        for i in range(len(final_parameters)):
+            fig, ax = plt.subplots(2, 1, dpi=150, figsize=(5, 4.1))
+            plt.subplot(2,1,1)
+            plt.plot(q_values, data[i], label= 'True')
+            for j in range(4):
+                #label = '*' if j == number_of_layers[0][i]-1 else ' '
+                #par_str = ' '.join(['%-6.3f ' % p for p in final_parameters[i][j]])
+                q, r, z, sld = calculate_reflectivity(q_values, final_parameters[i][j])
+                plt.subplot(2,1,1)
+                plt.plot(q_values, r*10**(j+1), label= str(j+1))
+                plt.subplot(2,1,2)
+                plt.plot(z, sld, label=str(j+1))
+            plt.subplot(2,1,1)
+            plt.xlabel('Q ($1/\AA$)', fontsize=10)
+            plt.ylabel('Reflectivity', fontsize=10)
+            plt.yscale('log')
+            plt.xscale('log')
+            plt.legend()
+            plt.subplot(2,1,2)
+            plt.legend()
+    def correct_refl(self, data, q_values):
+        refl_corrected=[]
+        for i in range( len(data[0])):
+            refl_corrected_ = np.power(10, data[0][i])/q_values**2*q_values[0]**2
+            refl_corrected.append(refl_corrected_)
+        return refl_corrected
+
+
 
     def rescale_parameters(self, parameters, number_of_layers):
         new_parameters=[]
@@ -148,7 +197,7 @@ def fit_data(q, data, parameters, errors=None, q_resolution=0.025):
 
     expt = create_fit_experiment(q, parameters, data, errors, q_resolution=0.02)
     problem = FitProblem(expt)
-    results = fit(problem, method='dream', samples=2000, burn=2000, pop=20, verbose=True)
+    results = fit(problem, method='dream', samples=2000, burn=2000, pop=20, verbose=False)
     
     # The results are in a different order: rough, SLD, thickness
     fit_pars = [results.x[0]]

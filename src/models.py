@@ -7,7 +7,7 @@ import pickle
 from pathlib import Path
 sys.path.append(os.path.expanduser("~/git/machine_learning/src"))
 import structure_predictor as sp
-predictor = sp.StructurePredictor(os.path.expanduser("~vogtdan000/git/machine_learning/src/settings.json"),2)
+predictor = sp.StructurePredictor(os.path.expanduser("~vogtdan000/git/machine_learning/src/settings.json"))
 
 
 def gaussian_with_constant(x, a, center, width, background, noise=None):
@@ -242,7 +242,7 @@ def chi_layer_preds(predicted_pars,real_parameters, q_values, k):
     min_chi=999999999999999
     layer=0
     for i in range(4):
-        q, r_real, z, sld = sp.calculate_reflectivity(q_values, real_parameters[i])
+        q, r_real, z, sld = sp.calculate_reflectivity(q_values, real_parameters[k])
         q, r, z, sld = sp.calculate_reflectivity(q_values, predicted_pars[k][i])
         chi2=np.mean((r_real-r)**2/(0.1*r)**2)
         if chi2<min_chi:
@@ -266,7 +266,7 @@ def big_predict_accuracy(predicted_pars, real_parameters, q_values):
             _c = np.sum([int(layers[idx]==i and real_number_of_layers[idx]==j) for idx in range(len(predicted_pars))])
             _counts.append(_c)
             f=f+_c
-        for idx in range(0,4):
+        for idx in range(4):
             confusion=_counts[idx]/f*100
             _confusion.append(confusion)
         print(_confusion)
