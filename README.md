@@ -1,42 +1,22 @@
-# Machine Learning Project
+# Using the Structure Predictor
 
-## 1. KN classifier
+## Importing the packages
 
- 1.1 Training data with up to 3 layers [orhs3]  *done*
-
- 1.2 Training data with up to 3 layers, with noise [orhs3-noise]  *done*
+In order to use the Structure Predictor, the sys, os, and structure_predictor pacakges need to be imported. In order to import the structure_predictor pacakge, sys and os need to be used, as shown in the code below.
  
- 1.3 Compare the results from 1.1 and 1.2 *done*
+   import sys
+   import os
+   sys.path.append(os.path.expanduser("~imeliamb/git/machine_learning/src"))
+   import structure_predictor as sp
  
- 1.4 Repeat with up to 4 layers [orhs4 and orhs4-noise] *done*
+## Loading the Predictor
 
- 1.5 Produce confusion matrix for both with and without noise
- 
-## 2. R(q) to layer parameters (without noise)
+To load the predictor a variable has to be made to call the functions in the structure predictor class. There is only one neccessary input for the initilization of the class, the settings file. This file is a json file containing information such as the paths to the neural networks and fit parameters. Below is a line of code loading the predictor using the settings file we created.
 
- 2.1 Convolutional Neural network for single layer *done*
+   predictor = sp.StructurePredictor(os.path.expanduser("~imeliamb/git/machine_learning/src/settings.json"))
  
- 2.2 CNN for two layers *done*
- 
- 2.3 CNN for three layers *done*
- 
- 2.4 CNN for four layers *done*
- 
-## 3. Analyzer script
- 3.1 Write a script that takes an R(Q) curve and predicts how many layers and what the parameters are. *done*
+## Using the predictor
 
- 3.2 Write script to overplot real and predicted R(Q) and SLD curves
-  
- 3.3 Same as 3.1, but ranks best solutions. Compare top 2 soloutions with 3.2 and compute residuals for each
+The predictor will run a given refl curve through a kNN model which will predict the number of layers in a thin film. It will then run the curve through 4 CNNs which will all give different predictions for the parameters of the film. Each CNN is specified to a certain number of layers in a film, either 1, 2, 3, or 4. To use the predictor four inputs are needed; the refl curves, the q values, and true or false twice. The refl curves can be entered as either an array of curves or a single one, an array of data has to be inputed within an array (in a set of brackets) and a single curve has to be inputed within two arrays (in two sets of brackets). The true and false parameters correlate to optimization and graphing. If the third parameter is True then optimization is togled on, if the fourth parameter is True then graphing of the predicted refl and SLD curves is togled on. The function will ouput 3 things, the preditcted number of layers, the predicted parameters for each layer, and the unscaled version of these layers. 
 
-## 4. Results
- 4.1 Run the analyzer on 1, 2, 3, and 4 layers of assimilated data sets to assess quality of results
-
- 4.1.1 Overplot SLD and R(Q) curves for when the predicted number of layers is wrong
-
- 4.1.2 For data with accurate prediction of number of layers produce correlation plot for all parameters
-  
- 4.2 Revisit networks in 2 as needed. Add noise if needed
-  
- 4.3 Test on real data and compare to manual model
- 
+   predicted_layers, predicted_pars, unscaled_preds = predictor.big_predict([refl], q_values, True, True)
