@@ -148,7 +148,7 @@ class StructurePredictor:
             final_parameters=self.big_predict_optimize(data, q_values, almost_parameters, self.fit_ranges)
             number_of_layers=self.layer_predictor(data, final_parameters, q_values, self.fit_ranges)
             self.big_predict_graph(final_parameters, q_values, number_of_layers, data)
-      
+         
         return number_of_layers, final_parameters, parameters
         
     def layer_predictor (self, data, final_parameters, q_values, fit_ranges):
@@ -194,17 +194,19 @@ class StructurePredictor:
         
         
     def big_predict_graph(self, final_parameters, q_values, number_of_layers, data):
+        
         data=self.correct_refl(data, q_values)
         for i in range(len(final_parameters)):
             fig, ax = plt.subplots(2, 1, dpi=150, figsize=(5, 4.1))
             plt.subplot(2,1,1)
-            plt.plot(q_values, data[i], label= 'True')
+            #plt.plot(q_values, data[0], label= 'True')
             for j in range(4):
                 #label = '*' if j == number_of_layers[0][i]-1 else ' '
                 #par_str = ' '.join(['%-6.3f ' % p for p in final_parameters[i][j]])
                 q, r, z, sld = calculate_reflectivity(q_values, final_parameters[i][j], self.fit_ranges)
                 plt.subplot(2,1,1)
                 plt.plot(q_values, r*10**(j+1), label= str(j+1))
+                plt.errorbar(q_values, data[0]*10**(j+1), color='grey')
                 plt.subplot(2,1,2)
                 plt.plot(z, sld, label=str(j+1))
             plt.subplot(2,1,1)
@@ -276,7 +278,7 @@ def fit_data(q, data, parameters, ranges,  errors=None, q_resolution=0.025):
     return fit_pars, fit_errs
 
 
-def create_fit_experiment(q, parameters, ranges, data=None, errors=None, q_resolution=0.025):
+def create_fit_experiment(q, parameters, ranges=None, data=None, errors=None, q_resolution=0.025):
     #zeros = np.zeros(len(q))
     dq = q_resolution * q / 2.355
 
@@ -291,17 +293,19 @@ def create_fit_experiment(q, parameters, ranges, data=None, errors=None, q_resol
     for i in range(n_layers):
         sample = sample | Slab(material=SLD(name='l%s' % i, rho=parameters[3*i+1]),
                                thickness=parameters[3*i+2], interface=parameters[3*i+3])
-        sample['l%s' % i].thickness.range(ranges[0][0], ranges[0][1])
-        sample['l%s' % i].material.rho.range(ranges[1][0], ranges[1][1])
-        sample['l%s' % i].interface.range(ranges[2][0], ranges[2][1])
+        if ranges is not None:
+            sample['l%s' % i].thickness.range(ranges[0][0], ranges[0][1])
+            sample['l%s' % i].material.rho.range(ranges[1][0], ranges[1][1])
+            sample['l%s' % i].interface.range(ranges[2][0], ranges[2][1])
 
-    sample['Si'].interface.range(ranges[3][0], ranges[3][1])
+    if ranges is not None:
+        sample['Si'].interface.range(ranges[3][0], ranges[3][1])
     sample = sample | Slab(material=SLD('Air', rho=0))
     
     return Experiment(probe=probe, sample=sample)
 
 
-def calculate_reflectivity(q, parameters, ranges, q_resolution=0.02):
+def calculate_reflectivity(q, parameters, ranges=None, q_resolution=0.02):
     """
         Reflectivity calculation using refl1d
     """

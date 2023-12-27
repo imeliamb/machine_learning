@@ -1,9 +1,9 @@
 {
   "classifier":"/SNS/users/imeliamb/git/machine_learning/data/knn4layer",
   "two_piece":[[1, "/SNS/users/imeliamb/git/machine_learning/data/knn1-2layer"],
-                          [2,"/SNS/users/imeliamb/git/machine_learning/data/knn1-2layer"],
-                          [3, "/SNS/users/imeliamb/git/machine_learning/data/knn3-4layer"],
-			  [4, "/SNS/users/imeliamb/git/machine_learning/data/knn3-4layer"]
+               [2,"/SNS/users/imeliamb/git/machine_learning/data/knn1-2layer"],
+               [3, "/SNS/users/imeliamb/git/machine_learning/data/knn3-4layer"],
+               [4, "/SNS/users/imeliamb/git/machine_learning/data/knn3-4layer"]
                            ],
   "parameter_predictors":[[1, "/SNS/users/imeliamb/git/machine_learning/data/cnn1layer-model", "/SNS/users/m2d/git/analysis_playground/ml/config1-pars.json"],
                           [2, "/SNS/users/imeliamb/git/machine_learning/data/cnn2layer-model","/SNS/users/m2d/git/analysis_playground/ml/config2-pars.json"],
@@ -11,10 +11,10 @@
                           [4, "/SNS/users/imeliamb/git/machine_learning/data/cnn4layer-model", "/SNS/users/m2d/git/analysis_playground/ml/config4-pars.json"]
                            ],
  
-  "fit_ranges":[[20.0, 950.0],
-                          [-1.0, 7.0],
-                          [20.0, 60.0],
-                          [4.0, 30.0]
+  "fit_ranges":[[20.0, 1000.0],
+                          [-3.0, 7.0],
+                          [4.0, 100.0],
+                          [4.0, 100.0]
                            ]
 
 }
